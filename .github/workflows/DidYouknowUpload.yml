@@ -2,8 +2,8 @@ name: Run Did You Know Uploader Pipeline
 
 on:
   workflow_dispatch:  # manual trigger
-  push:
-    branches: [ main ]
+  #push:
+    #branches: [ main ]
   schedule:
     - cron: '0 6 */2 * *'  # Every 2 days at 06:00 UTC
 jobs:

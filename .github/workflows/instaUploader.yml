@@ -35,7 +35,7 @@ jobs:
           pip install playwright python-dotenv yt-dlp \
               google-api-python-client google-auth google-auth-oauthlib google-auth-httplib2
           playwright install chromium
-          
+
       - name: 🧱 Install XVFB for headless=false GUI
         run: |
           sudo apt-get update
@@ -43,6 +43,7 @@ jobs:
 
       - name: 🔍 Step 1 - Extract Reel URLs with GUI Playwright
         run: |
+          cd ReelUploader
           xvfb-run --auto-servernum -- python ReelURLFetcher.py --url "${{ github.event.inputs.URL }}"
 
 
