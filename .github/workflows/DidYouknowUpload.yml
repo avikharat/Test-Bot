@@ -4,7 +4,8 @@ on:
   workflow_dispatch:  # manual trigger
   push:
     branches: [ main ]
-
+  schedule:
+    - cron: '0 6 */2 * *'  # Every 2 days at 06:00 UTC
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
