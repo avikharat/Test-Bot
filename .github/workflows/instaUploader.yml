@@ -38,15 +38,15 @@ jobs:
 
       - name: 🔍 Step 1 - Extract Reel URLs from Audio Page
         run: |
-          cd Reeluploader
+          cd ReelUploader
           python ReelURLFetcher.py --url "$INSTAGRAM_REEL_URL"
 
       - name: 📥 Step 2 - Download Reels from URL List
         run: |
-          cd Reeluploader
+          cd ReelUploader
           python reelDownloader.py
 
       - name: 📤 Step 3 - Upload Reels to YouTube Shorts
         run: |
-          cd Reeluploader
+          cd ReelUploader
           python uploadYoutube.py
