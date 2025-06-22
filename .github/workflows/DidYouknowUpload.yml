@@ -32,6 +32,12 @@ jobs:
         pip install -r requirements.txt
     - name: 🧙 Install ImageMagick
       run: sudo apt-get update && sudo apt-get install -y imagemagick
+    - name: 🛡️ Relax ImageMagick security policy for MoviePy
+      run: |
+        sudo sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
+        sudo sed -i 's/rights="none" pattern="LABEL"/rights="read|write" pattern="LABEL"/' /etc/ImageMagick-6/policy.xml
+        sudo sed -i 's/rights="none" pattern="TEXT"/rights="read|write" pattern="TEXT"/' /etc/ImageMagick-6/policy.xml
+
     - name: ▶️ Step 1 Generate Scripts
       run: |
         cd DidYouKnowUploader
