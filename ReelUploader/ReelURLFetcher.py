@@ -22,7 +22,8 @@ def login_to_instagram(page):
     page.fill("input[name='username']", USERNAME)
     page.fill("input[name='password']", PASSWORD)
     page.click("button[type='submit']")
-    page.wait_for_selector("svg[aria-label='Home']", timeout=15000)
+    #page.wait_for_selector("svg[aria-label='Home']", timeout=15000)
+    time.sleep(3)
     print("✅ Login successful!")
 
 def extract_reel_links(page, audio_page_url):
