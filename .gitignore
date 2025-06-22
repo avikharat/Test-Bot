@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+.env
+.venv/
+venv/
+*.sqlite3
+*.db
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Logs and temp
+*.log
+*.bak
+*.tmp
+*.swp
+.DS_Store
+*.old
+
+# Generated media files
+*.mp4
+*.webm
+*.wav
+*.mp3
+
+# Output folders
+short_*/output_*.mp4
+short_*/script.json
+short_*/short_*.mp4
+
+# AI or D-ID temp files
+reels_from_audio.json
+used_topics.json
+
+# Auth secrets or tokens
+client_secret.json
+token.json
+*.pem
+*.key
+
+# GitHub Actions artifacts
+*.zip
+dist/
+build/
