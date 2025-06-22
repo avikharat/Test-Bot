@@ -31,22 +31,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: ▶️ Step 1: Generate Scripts
+    - name: ▶️ Step 1 Generate Scripts
       run: |
         cd DidYouKnowUploader
         python generateScripts.py
 
-    - name: ▶️ Step 2: Generate D-ID Videos
+    - name: ▶️ Step 2 Generate D-ID Videos
       run: |
         cd DidYouKnowUploader
         python generateVideos.py
 
-    - name: ▶️ Step 3: Add Captions
+    - name: ▶️ Step 3 Add Captions
       run: |
         cd DidYouKnowUploader
         python editVideos.py
 
-    - name: ▶️ Step 4: Upload to YouTube
+    - name: ▶️ Step 4 Upload to YouTube
       run: |
         cd DidYouKnowUploader
         python bulk_upload.py
