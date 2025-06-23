@@ -45,8 +45,8 @@ jobs:
       - name: 🔍 Step 1 - Extract Reel URLs with GUI Playwright
         run: |
           cd ReelUploader
-          xvfb-run --auto-servernum -- python ReelURLFetcher.py --url "${{ github.event.inputs.URL }}"
           python googleScrap.py
+#xvfb-run --auto-servernum -- python ReelURLFetcher.py --url "${{ github.event.inputs.URL }}"
   
       - name: 📥 Step 2 - Download Reels from URL List
         run: |
