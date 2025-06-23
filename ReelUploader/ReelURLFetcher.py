@@ -1,30 +1,13 @@
 from playwright.sync_api import sync_playwright
 import time
 import json
-import os
 import argparse
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
-USERNAME = os.getenv("INSTAGRAM_USERNAME")
-PASSWORD = os.getenv("INSTAGRAM_PASSWORD")
-
+# Configuration
 MAX_SCROLLS = 5
 MAX_IDLE_SCROLLS = 2
 SCROLL_PAUSE = 2
-
-def login_to_instagram(page):
-    print("🔐 Logging in to Instagram...")
-    page.goto("https://www.instagram.com/accounts/login/", timeout=60000)
-    page.wait_for_selector("input[name='username']", timeout=15000)
-    page.fill("input[name='username']", USERNAME)
-    page.fill("input[name='password']", PASSWORD)
-    page.click("button[type='submit']")
-    #page.wait_for_selector("svg[aria-label='Home']", timeout=15000)
-    time.sleep(3)
-    print("✅ Login successful!")
+MAX_REELS = 10  # 🔢 Limit to 10 reels
 
 def extract_reel_links(page, audio_page_url):
     print(f"🔗 Visiting: {audio_page_url}")
@@ -51,8 +34,14 @@ def extract_reel_links(page, audio_page_url):
                 if full_url not in reel_links:
                     reel_links.add(full_url)
                     new_links_found += 1
+                    if len(reel_links) >= MAX_REELS:
+                        break
 
         print(f"🔁 Scroll {i+1}/{MAX_SCROLLS}: +{new_links_found} new, total = {len(reel_links)}")
+
+        if len(reel_links) >= MAX_REELS:
+            print("✅ Reached maximum reel count — stopping.")
+            break
 
         if new_links_found == 0:
             idle_scrolls += 1
@@ -66,23 +55,22 @@ def extract_reel_links(page, audio_page_url):
         page.mouse.wheel(0, 2500)
         time.sleep(SCROLL_PAUSE)
 
-    return list(reel_links)
+    return list(reel_links)[:MAX_REELS]
 
 def main():
-    parser = argparse.ArgumentParser(description="Scrape reels using Instagram Audio Page URL.")
+    parser = argparse.ArgumentParser(description="Scrape up to 10 reels using Instagram Page URL.")
     parser.add_argument(
         "--url", 
         required=False, 
         default="https://www.instagram.com/family.guy.reels/reels/",
-        help="Instagram Audio Page URL to scrape reels from"
+        help="Instagram Page URL to scrape reels from"
     )
     args = parser.parse_args()
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
-        login_to_instagram(page)
         reels = extract_reel_links(page, args.url)
         browser.close()
 
@@ -94,4 +82,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 #py ReelURLFetcher.py --url "https://www.instagram.com/music/some.audio.page/reels/"
