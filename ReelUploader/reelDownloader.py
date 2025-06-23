@@ -2,7 +2,7 @@ import json
 import subprocess
 import os
 
-REELS_JSON = "reels_from_audio.json"
+REELS_JSON = "reelsLink.json"
 DOWNLOAD_DIR = "downloaded_reels"
 
 def download_reel(url, output_path):

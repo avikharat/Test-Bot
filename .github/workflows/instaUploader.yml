@@ -32,6 +32,7 @@ jobs:
       - name: 📦 Install Python + Playwright Dependencies
         run: |
           pip install -r requirements.txt || true
+          pip install googlesearch-python
           pip install playwright python-dotenv yt-dlp \
               google-api-python-client google-auth google-auth-oauthlib google-auth-httplib2
           playwright install chromium
@@ -45,8 +46,8 @@ jobs:
         run: |
           cd ReelUploader
           xvfb-run --auto-servernum -- python ReelURLFetcher.py --url "${{ github.event.inputs.URL }}"
-
-
+          python googleScrap.py
+  
       - name: 📥 Step 2 - Download Reels from URL List
         run: |
           cd ReelUploader
