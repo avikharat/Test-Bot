@@ -19,7 +19,7 @@ def extract_reel_links(page, audio_page_url):
         time.sleep(1)
     except Exception as e:
         print("⚠️ Failed to dismiss popup:", e)
-
+    time.sleep(10)
     reel_links = set()
     idle_scrolls = 0
 
