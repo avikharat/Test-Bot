@@ -29,18 +29,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: 📦 Install Python + Playwright Dependencies
+      - name: 📦 Install Python Dependencies
         run: |
           pip install -r requirements.txt || true
           pip install googlesearch-python
-          pip install playwright python-dotenv yt-dlp \
+          pip install python-dotenv yt-dlp \
               google-api-python-client google-auth google-auth-oauthlib google-auth-httplib2
-          playwright install chromium
-
-      - name: 🧱 Install XVFB for headless=false GUI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
 
       - name: 🔍 Step 1 - Extract Reel URLs with GUI Playwright
         run: |
