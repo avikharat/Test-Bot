@@ -22,28 +22,36 @@ def download_did_clip(clip_id: str, api_key: str, output_path: str):
     print(f"[*] Waiting for clip '{clip_id}' to finish processing...")
 
     for attempt in range(30):
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        data = response.json()
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
 
-        if data.get("status") == "done":
-            result_url = data.get("result_url")
-            print(f"[+] Clip is ready! Downloading from: {result_url}")
-            break
-        else:
-            print(f"    Attempt {attempt + 1}/30 — Status: {data.get('status')}")
+            if data.get("status") == "done":
+                result_url = data.get("result_url")
+                print(f"[+] Clip is ready! Downloading from: {result_url}")
+                break
+            else:
+                print(f"    Attempt {attempt + 1}/30 — Status: {data.get('status')}")
+                time.sleep(2)
+        except Exception as e:
+            print(f"⚠️ Error while polling clip status: {e}")
             time.sleep(2)
     else:
         raise TimeoutError("[-] Clip did not finish processing in time.")
 
-    video = requests.get(result_url)
-    video.raise_for_status()
+    try:
+        video = requests.get(result_url)
+        video.raise_for_status()
 
-    with open(output_path, "wb") as f:
-        f.write(video.content)
+        with open(output_path, "wb") as f:
+            f.write(video.content)
 
-    print(f"[+] Clip saved to: {output_path}")
-    return output_path
+        print(f"[+] Clip saved to: {output_path}")
+        return output_path
+    except Exception as e:
+        print(f"❌ Failed to download clip: {e}")
+        return None
 
 
 def select_presenter_and_voice(presenters_file="presenters.json", voices_file="voices.json"):
@@ -68,73 +76,86 @@ def select_presenter_and_voice(presenters_file="presenters.json", voices_file="v
 
 
 def create_clip(script_text, output_path):
-    presenter, voice = select_presenter_and_voice()
-    presenter_id = presenter["presenter_id"]
-    voice_id = voice["voice_id"]
+    try:
+        presenter, voice = select_presenter_and_voice()
+        presenter_id = presenter["presenter_id"]
+        voice_id = voice["voice_id"]
 
-    headers = {
-        "Authorization": "Basic " + base64.b64encode(f"{DID_API_KEY}:".encode()).decode(),
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "script": {
-            "type": "text",
-            "input": script_text,
-            "provider": {
-                "type": "elevenlabs",
-                "voice_id": voice_id
-            }
-        },
-        "presenter_id": presenter_id,
-        "config": {
-            "fluent": True,
-            "pad_audio": 0.2,
-            "result_format": "webm"
-        },
-        "presenter_config": {
-            "crop": {
-                "type": "wide"
-            }
-        },
-        "background": {
-            "source_url": "https://res.cloudinary.com/dtfum7lfk/image/upload/v1750570765/pexels-atbo-66986-245240_rg7kgd.jpg"
+        headers = {
+            "Authorization": "Basic " + base64.b64encode(f"{DID_API_KEY}:".encode()).decode(),
+            "Content-Type": "application/json"
         }
-    }
 
-    response = requests.post("https://api.d-id.com/clips", headers=headers, json=payload)
+        payload = {
+            "script": {
+                "type": "text",
+                "input": script_text,
+                "provider": {
+                    "type": "elevenlabs",
+                    "voice_id": voice_id
+                }
+            },
+            "presenter_id": presenter_id,
+            "config": {
+                "fluent": True,
+                "pad_audio": 0.2,
+                "result_format": "webm"
+            },
+            "presenter_config": {
+                "crop": {
+                    "type": "wide"
+                }
+            },
+            "background": {
+                "source_url": "https://res.cloudinary.com/dtfum7lfk/image/upload/v1750570765/pexels-atbo-66986-245240_rg7kgd.jpg"
+            }
+        }
 
-    if response.ok:
-        data = response.json()
-        clip_id = data.get("id")
-        print("✅ Clip created!")
-        return download_did_clip(clip_id, DID_API_KEY, output_path)
-    else:
-        print("❌ Failed to create clip:")
-        print(response.status_code, response.text)
+        response = requests.post("https://api.d-id.com/clips", headers=headers, json=payload)
+
+        if response.ok:
+            data = response.json()
+            clip_id = data.get("id")
+            print("✅ Clip created!")
+            return download_did_clip(clip_id, DID_API_KEY, output_path)
+        else:
+            print("❌ Failed to create clip:")
+            print(response.status_code, response.text)
+            return None
+    except Exception as e:
+        print(f"❌ Error creating clip: {e}")
         return None
 
 
 def generate_clips_from_scripts(base_dir="."):
     for folder in os.listdir(base_dir):
         if folder.startswith("short_") and os.path.isdir(folder):
-            json_path = os.path.join(folder, "script.json")
-            output_path = os.path.join(folder, f"{folder}.mp4")
+            try:
+                json_path = os.path.join(folder, "script.json")
+                output_path = os.path.join(folder, f"{folder}.mp4")
 
-            if not os.path.exists(json_path):
-                print(f"⚠️ Skipping {folder} — script.json not found.")
+                if not os.path.exists(json_path):
+                    print(f"⚠️ Skipping {folder} — script.json not found.")
+                    continue
+
+                with open(json_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+
+                story = data.get("story", "").strip()
+                if not story:
+                    print(f"⚠️ Skipping {folder} — 'story' is missing.")
+                    continue
+
+                print(f"\n🎬 Generating video for {folder}...")
+                result = create_clip(script_text=story, output_path=output_path)
+
+                if result is None:
+                    print(f"❌ Failed to generate or save clip for {folder}")
+                else:
+                    print(f"✅ Done with {folder}")
+            except Exception as e:
+                print(f"❌ Unexpected error with {folder}: {e}")
                 continue
-
-            with open(json_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-
-            story = data.get("story", "").strip()
-            if not story:
-                print(f"⚠️ Skipping {folder} — 'story' is missing.")
-                continue
-
-            print(f"\n🎬 Generating video for {folder}...")
-            create_clip(script_text=story, output_path=output_path)
 
 
 if __name__ == "__main__":
